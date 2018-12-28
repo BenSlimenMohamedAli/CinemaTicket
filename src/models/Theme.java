@@ -25,6 +25,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import utils.IdNotFoundException;
 
 /**
  *
@@ -87,7 +88,7 @@ public class Theme implements Serializable {
         try {
             Statement statement =con.createStatement();  
             // insert the data
-            statement.executeUpdate("INSERT INTO admin(theme_name) " + "VALUES ('"+this.themeName+"' )");
+            statement.executeUpdate("INSERT INTO theme(theme_name) " + "VALUES ('"+this.themeName+"' )");
             con.close();
         } catch(Exception e) {
             e.printStackTrace();
@@ -113,6 +114,30 @@ public class Theme implements Serializable {
         }
         
         return themes;
+    }
+    
+    /**
+     * 
+     * @param id 
+     */
+    public static Theme getById(int id) throws Exception{
+        Connection con = Database.connect();
+        Theme theme = null;
+
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from theme where theme_id ="+id+"");
+ 
+            if (!rs.next() ) {
+                throw new IdNotFoundException();
+            } else {
+                rs.beforeFirst();
+                while(rs.next()) {
+                    theme = new Theme(rs.getInt(1),rs.getString(2));
+                }
+            }
+            con.close();
+           
+        return theme;
     }
 
     @XmlTransient

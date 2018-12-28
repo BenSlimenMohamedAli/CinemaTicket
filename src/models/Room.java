@@ -6,7 +6,12 @@
 package models;
 
 import cinematicket.*;
+import database.Database;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -20,6 +25,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import utils.IdNotFoundException;
 
 /**
  *
@@ -52,6 +58,19 @@ public class Room implements Serializable {
     private Collection<Projection> projectionCollection;
 
     public Room() {
+    }
+
+    public Room(String roomName, Integer roomNumber, Integer capacity) {
+        this.roomName = roomName;
+        this.roomNumber = roomNumber;
+        this.capacity = capacity;
+    }
+
+    public Room(Integer roomId, String roomName, Integer roomNumber, Integer capacity) {
+        this.roomId = roomId;
+        this.roomName = roomName;
+        this.roomNumber = roomNumber;
+        this.capacity = capacity;
     }
 
     public Room(Integer roomId) {
@@ -88,6 +107,70 @@ public class Room implements Serializable {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+    
+     /**
+      * 
+      */
+    public void add() {
+        Connection con = Database.connect();
+        try {
+            Statement statement = con.createStatement();  
+            // insert the data
+            statement.executeUpdate("INSERT INTO room (room_name, room_number, capacity) " 
+                    +"VALUES ('"+this.roomName
+                            + "',"+this.roomNumber
+                            +","+this.capacity
+                            +")");
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public static ArrayList<Room> getAll() {
+        ArrayList<Room> rooms = new ArrayList<Room>();
+        Connection con = Database.connect();
+        try {
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from room");
+            while(rs.next()) {
+                rooms.add(new Room(rs.getInt(1), rs.getString(2),rs.getInt(3),rs.getInt(4)));
+            }
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
+        return rooms;
+    }
+    
+    /**
+     * 
+     * @param id 
+     */
+    public static Room getById(int id) throws Exception{
+        Connection con = Database.connect();
+        Room room = null;
+
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from room where room_id ="+id+"");
+ 
+            if (!rs.next() ) {
+                throw new IdNotFoundException();
+            } else {
+                rs.beforeFirst();
+                while(rs.next()) {
+                    room = new Room(rs.getInt(1), rs.getString(2),rs.getInt(3),rs.getInt(4));
+                }
+            }
+            con.close();
+           
+        return room;
     }
 
     @XmlTransient

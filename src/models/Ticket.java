@@ -6,7 +6,12 @@
 package models;
 
 import cinematicket.*;
+import database.Database;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +24,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import utils.IdNotFoundException;
 
 /**
  *
@@ -43,10 +49,10 @@ public class Ticket implements Serializable {
     private Integer placeNumber;
     @JoinColumn(name = "projection_id", referencedColumnName = "projection_id")
     @ManyToOne
-    private Projection projectionId;
+    private int projectionId;
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     @ManyToOne
-    private User userId;
+    private int userId;
 
     public Ticket() {
     }
@@ -54,6 +60,21 @@ public class Ticket implements Serializable {
     public Ticket(Integer ticketId) {
         this.ticketId = ticketId;
     }
+
+    public Ticket(Integer ticketId, Integer placeNumber, int projectionId, int userId) {
+        this.ticketId = ticketId;
+        this.placeNumber = placeNumber;
+        this.projectionId = projectionId;
+        this.userId = userId;
+    }
+
+    public Ticket(Integer placeNumber, int projectionId, int userId) {
+        this.placeNumber = placeNumber;
+        this.projectionId = projectionId;
+        this.userId = userId;
+    }
+    
+    
 
     public Integer getTicketId() {
         return ticketId;
@@ -71,21 +92,86 @@ public class Ticket implements Serializable {
         this.placeNumber = placeNumber;
     }
 
-    public Projection getProjectionId() {
+    public int getProjectionId() {
         return projectionId;
     }
 
-    public void setProjectionId(Projection projectionId) {
+    public void setProjectionId(int projectionId) {
         this.projectionId = projectionId;
     }
 
-    public User getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(User userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
+    
+      /**
+      * 
+      */
+    public void add() {
+        Connection con = Database.connect();
+        try {
+            Statement statement = con.createStatement();  
+            // insert the data
+            statement.executeUpdate("INSERT INTO ticket (place_number, projection_id, user_id) " 
+                    +"VALUES ("+this.placeNumber
+                            + ","+this.projectionId
+                            +","+this.userId
+                            +")");
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public static ArrayList<Ticket> getAll() {
+        ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+        Connection con = Database.connect();
+        try {
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from ticket");
+            while(rs.next()) {
+                tickets.add(new Ticket(rs.getInt(1), rs.getInt(2),rs.getInt(3),rs.getInt(4)));
+            }
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
+        return tickets;
+    }
+    
+     /**
+     * 
+     * @param id 
+     */
+    public static Ticket getById(int id) throws Exception{
+        Connection con = Database.connect();
+        Ticket ticket = null;
+
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from ticket where ticket_id ="+id+"");
+ 
+            if (!rs.next() ) {
+                throw new IdNotFoundException();
+            } else {
+                rs.beforeFirst();
+                while(rs.next()) {
+                    ticket = new Ticket(rs.getInt(1), rs.getInt(2),rs.getInt(3),rs.getInt(4));
+                }
+            }
+            con.close();
+           
+        return ticket;
+    }
+
 
     @Override
     public int hashCode() {

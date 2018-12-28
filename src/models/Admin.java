@@ -23,6 +23,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import strings.Strings;
+import utils.IdNotFoundException;
 
 /**
  *
@@ -137,6 +139,30 @@ public class Admin implements Serializable {
         }
         
         return admins;
+    }
+    
+    /**
+     * 
+     * @param id 
+     */
+    public static Admin getById(int id) throws Exception{
+        Connection con = Database.connect();
+        Admin admin = null;
+
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from admin where admin_id ="+id+"");
+ 
+            if (!rs.next() ) {
+                throw new IdNotFoundException();
+            } else {
+                rs.beforeFirst();
+                while(rs.next()) {
+                    admin = new Admin(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4));
+                }
+            }
+            con.close();
+           
+        return admin;
     }
 
     @XmlTransient

@@ -6,7 +6,12 @@
 package models;
 
 import cinematicket.*;
+import database.Database;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -25,6 +30,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import utils.IdNotFoundException;
 
 /**
  *
@@ -59,13 +65,13 @@ public class Projection implements Serializable {
     private Collection<Ticket> ticketCollection;
     @JoinColumn(name = "admin_id", referencedColumnName = "admin_id")
     @ManyToOne
-    private Admin adminId;
+    private int adminId;
     @JoinColumn(name = "film_id", referencedColumnName = "film_id")
     @ManyToOne
-    private Film filmId;
+    private int filmId;
     @JoinColumn(name = "room_id", referencedColumnName = "room_id")
     @ManyToOne
-    private Room roomId;
+    private int roomId;
 
     public Projection() {
     }
@@ -73,6 +79,27 @@ public class Projection implements Serializable {
     public Projection(Integer projectionId) {
         this.projectionId = projectionId;
     }
+
+    public Projection(Integer projectionId, Date projectionTime, Float price, Integer placesSold, int adminId, int filmId, int roomId) {
+        this.projectionId = projectionId;
+        this.projectionTime = projectionTime;
+        this.price = price;
+        this.placesSold = placesSold;
+        this.adminId = adminId;
+        this.filmId = filmId;
+        this.roomId = roomId;
+    }
+
+    public Projection(Date projectionTime, Float price, Integer placesSold, int adminId, int filmId, int roomId) {
+        this.projectionTime = projectionTime;
+        this.price = price;
+        this.placesSold = placesSold;
+        this.adminId = adminId;
+        this.filmId = filmId;
+        this.roomId = roomId;
+    }
+    
+    
 
     public Integer getProjectionId() {
         return projectionId;
@@ -115,29 +142,98 @@ public class Projection implements Serializable {
         this.ticketCollection = ticketCollection;
     }
 
-    public Admin getAdminId() {
+    public int getAdminId() {
         return adminId;
     }
 
-    public void setAdminId(Admin adminId) {
+    public void setAdminId(int adminId) {
         this.adminId = adminId;
     }
 
-    public Film getFilmId() {
+    public int getFilmId() {
         return filmId;
     }
 
-    public void setFilmId(Film filmId) {
+    public void setFilmId(int filmId) {
         this.filmId = filmId;
     }
 
-    public Room getRoomId() {
+    public int getRoomId() {
         return roomId;
     }
 
-    public void setRoomId(Room roomId) {
+    public void setRoomId(int roomId) {
         this.roomId = roomId;
     }
+    
+     /**
+      * 
+      */
+    public void add() {
+        Connection con = Database.connect();
+        java.sql.Timestamp datetime  = new java.sql.Timestamp(this.projectionTime.getTime());
+        try {
+            Statement statement = con.createStatement();  
+            // insert the data
+            statement.executeUpdate("INSERT INTO projection (projection_time, price, places_sold, admin_id, film_id, room_id) " 
+                    +"VALUES ('"+datetime
+                            + "',"+this.price
+                            +","+this.placesSold
+                            +","+this.adminId
+                            +","+this.filmId
+                            +","+this.roomId
+                            +")");
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public static ArrayList<Projection> getAll() {
+        ArrayList<Projection> projections = new ArrayList<Projection>();
+        Connection con = Database.connect();
+        try {
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from projection");
+            while(rs.next()) {
+                projections.add(new Projection(rs.getInt(1), rs.getTimestamp(2), rs.getFloat(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7)));
+            }
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
+        return projections;
+    }
+    
+    /**
+     * 
+     * @param id 
+     */
+    public static Projection getById(int id) throws Exception{
+        Connection con = Database.connect();
+        Projection projection = null;
+
+            Statement statement =con.createStatement();  
+            ResultSet rs = statement.executeQuery("SELECT * from projection where projection_id ="+id+"");
+ 
+            if (!rs.next() ) {
+                throw new IdNotFoundException();
+            } else {
+                rs.beforeFirst();
+                while(rs.next()) {
+                    projection = new Projection(rs.getInt(1), rs.getTimestamp(2), rs.getFloat(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7));
+                }
+            }
+            con.close();
+           
+        return projection;
+    }
+
 
     @Override
     public int hashCode() {

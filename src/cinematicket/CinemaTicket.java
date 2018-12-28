@@ -5,6 +5,11 @@
  */
 package cinematicket;
 
+import java.util.ArrayList;
+import models.Film;
+import java.util.Date;
+import java.lang.Exception;
+
 /**
  *
  * @author dslim
@@ -15,7 +20,17 @@ public class CinemaTicket {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        
+        
+        try {
+            Film f = Film.getById(1);
+            System.out.println(f.getFilmTitle());
+            System.out.println("dali");
+            System.out.println("salih");
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
+        
     }
     
 }

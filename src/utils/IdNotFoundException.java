@@ -20,6 +20,6 @@ public class IdNotFoundException extends Exception{
     public IdNotFoundException(String message, Throwable cause) { super(message, cause); }
     public IdNotFoundException(Throwable cause) { super(cause); }
     public String getMessage() {
-        return Strings.getError("getById");
+        return Strings.getError("id_not_found");
     }
 }

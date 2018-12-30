@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import strings.Strings;
 import utils.IdNotFoundException;
+import utils.AdminNotFoundException;
 
 /**
  *
@@ -163,6 +164,19 @@ public class Admin implements Serializable {
             con.close();
            
         return admin;
+    }
+    
+    public static boolean verifyExistense(String email , String password) throws Exception{
+        Connection con = Database.connect();
+        Statement statement =con.createStatement();  
+        ResultSet rs = statement.executeQuery("SELECT * from admin where email ='"+email+"' and password ='"+password+"'");
+        
+        if (!rs.next() ) {
+            throw new AdminNotFoundException();
+        } 
+        con.close();
+            
+        return true;
     }
 
     @XmlTransient

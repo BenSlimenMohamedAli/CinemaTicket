@@ -96,6 +96,22 @@ public class Theme implements Serializable {
     }
     
     /**
+      * 
+      */
+    public void delete() {
+        Connection con = Database.connect();
+        
+        try {
+            Statement statement =con.createStatement();  
+            // insert the data
+            statement.executeUpdate("delete from theme where theme_id = "+this.themeId);
+            con.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * 
      * @return 
      */

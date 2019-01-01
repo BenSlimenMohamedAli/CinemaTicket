@@ -5,10 +5,10 @@
  */
 package cinematicket;
 
+import application.AppMain;
 import java.util.ArrayList;
-import application.Main;
-import java.awt.event.WindowEvent;
 
+import controllers.MainController;
 /**
  *
  * @author dslim
@@ -19,8 +19,8 @@ public class CinemaTicket {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-       
-       Main main = new Main();  
+       MainController mainController = new MainController();
+               
     }
     
     

@@ -138,7 +138,6 @@ public class Admin implements Serializable {
         } catch(Exception e) {
             e.printStackTrace();
         }
-        
         return admins;
     }
     
@@ -152,8 +151,9 @@ public class Admin implements Serializable {
 
             Statement statement =con.createStatement();  
             ResultSet rs = statement.executeQuery("SELECT * from admin where admin_id ="+id+"");
- 
+            
             if (!rs.next() ) {
+                con.close();
                 throw new IdNotFoundException();
             } else {
                 rs.beforeFirst();
@@ -172,6 +172,7 @@ public class Admin implements Serializable {
         ResultSet rs = statement.executeQuery("SELECT * from admin where email ='"+email+"' and password ='"+password+"'");
         
         if (!rs.next() ) {
+            con.close();
             throw new AdminNotFoundException();
         } 
         con.close();

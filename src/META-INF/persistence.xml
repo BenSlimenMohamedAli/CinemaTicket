@@ -9,6 +9,7 @@
     <class>cinematicket.Room</class>
     <class>cinematicket.Theme</class>
     <class>cinematicket.User</class>
+    <class>application.AdminMain</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/cinema?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="root"/>
